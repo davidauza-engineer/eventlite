@@ -15,7 +15,8 @@ class Eventlite extends React.Component {
       title: '',
       start_datetime: '',
       location: '',
-      formErrors: {}
+      formErrors: {},
+      formValid: false
     };
   }
 
@@ -24,7 +25,29 @@ class Eventlite extends React.Component {
     const name = event.target.name;
     const newState = {};
     newState[name] = event.target.value;
-    this.setState(newState);
+    this.setState(newState, this.validateForm);
+  }
+
+  validateForm() {
+    let formErrors = {};
+    let formValid = true;
+    if (this.state.title.length <= 2) {
+      formErrors.title = ['is too short (minimum is 3 characters)'];
+      formValid = false;
+    }
+    if (this.state.location.length <= 0) {
+      formErrors.location = ["can't be blank"];
+      formValid = false;
+    }
+    if (this.state.start_datetime.length === 0) {
+      formErrors.start_datetime = ["can't be blank"];
+      formValid = false;
+    } else {
+      (Date.parse(this.state.start_datetime) <= Date.now())
+      formErrors.location = [""];
+      formValid = false;
+    }
+    this.setState({ formValid: formValid, formErrors: formErrors });
   }
 
   handleSubmit = event => {
@@ -71,7 +94,8 @@ class Eventlite extends React.Component {
           handleSubmit={this.handleSubmit}
           title={this.state.title}
           start_datetime={this.state.start_datetime}
-          location={this.state.location} />
+          location={this.state.location}
+          formValid={this.state.formValid} />
         <EventsList events={this.state.events} />
       </div>
     )
