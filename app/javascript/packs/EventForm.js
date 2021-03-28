@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 
 class EventForm extends React.Component {
 
@@ -19,11 +20,29 @@ class EventForm extends React.Component {
     event.preventDefault();
   }
 
+  handleSubmit = event => {
+    axios({
+      method: 'POST',
+      url: '/events',
+      data: { event: this.state },
+      headers: {
+        'X-CSRF-Token': document.querySelector("meta[name=csrf-token]").content
+      }
+    })
+    .then(response => {
+      this.props.handleNewEvent(response.data);
+    })
+    .catch(error => {
+      console.log(error)
+    });
+    event.preventDefault();
+  }
+
   render() {
     return (
       <div>
         <h4>Create an Event:</h4>
-        <form>
+        <form onSubmit={this.handleSubmit}>
           <input type="text" name="title" placeholder="Title" value={this.state.title} onChange={this.handleInput} />
           <input type="text" name="start_datetime" placeholder="Date" value={this.state.start_datetime} onChange={this.handleInput} />
           <input type="text" name="location" placeholder="Location" value={this.state.location} onChange={this.handleInput} />
