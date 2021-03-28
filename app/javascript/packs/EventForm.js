@@ -22,7 +22,7 @@ class EventForm extends React.Component {
   render() {
     return (
       <div>
-        <h4>Create an Event</h4>
+        <h4>Create an Event:</h4>
         <form>
           <input type="text" name="title" placeholder="Title" value={this.state.title} onChange={this.handleInput} />
           <input type="text" name="start_datetime" placeholder="Date" value={this.state.start_datetime} onChange={this.handleInput} />
