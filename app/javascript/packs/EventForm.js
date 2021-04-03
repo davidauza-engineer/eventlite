@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const EventForm = (props) => (
   <div>
@@ -11,5 +12,14 @@ const EventForm = (props) => (
     </form>
   </div>
 )
+
+EventForm.propTypes = {
+  handleInput: PropTypes.func.isRequired,
+  handleSubmit: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
+  start_date: PropTypes.string.isRequired,
+  location: PropTypes.string.isRequired,
+  formValid: PropTypes.bool.isRequired
+}
 
 export default EventForm;
