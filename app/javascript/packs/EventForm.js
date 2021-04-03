@@ -17,7 +17,7 @@ EventForm.propTypes = {
   handleInput: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   title: PropTypes.string.isRequired,
-  start_date: PropTypes.string.isRequired,
+  start_datetime: PropTypes.string.isRequired,
   location: PropTypes.string.isRequired,
   formValid: PropTypes.bool.isRequired
 }
