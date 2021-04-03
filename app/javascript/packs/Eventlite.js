@@ -12,9 +12,9 @@ class Eventlite extends React.Component {
     super(props);
     this.state = {
       events: this.props.events,
-      title: '',
-      start_datetime: '',
-      location: '',
+      title: { value: '', valid: false },
+      start_datetime: { value: '', valid: false },
+      location: { value: '', valid: false },
       formErrors: {},
       formValid: false
     };
@@ -23,39 +23,52 @@ class Eventlite extends React.Component {
   handleInput = (event) => {
     event.preventDefault();
     const name = event.target.name;
+    const value = event.target.value
     const newState = {};
-    newState[name] = event.target.value;
-    this.setState(newState, this.validateForm);
+    newState[name] = { ...this.state[name], value: value };
+    this.setState(newState, () => this.validateField(name, value));
   }
 
+  validateField(fieldName, fieldValue) {
+    let fieldValid = true;
+    let errors = [];
+    switch (fieldName) {
+      case 'title':
+        if (fieldValue.length <= 2) {
+          errors = errors.concat(['is too short (minimum is three characters']);
+          fieldValid = false;
+        }
+        break;
+      case 'location':
+        if (fieldValue.length === 0) {
+          errors = errors.concat(["can't be blank"]);
+          fieldValid = false;
+        }
+        break;
+      case 'start_datetime':
+        if (fieldValue.length === 0) {
+          errors = errors.concat(["can't be blank"]);
+          fieldValid = false;
+        } else if (Date.parse(fieldValue) <= Date.now()) {
+          errors = errors.concat(["can't be in the past"]);
+        }
+        break;
+    }
+    const newState = { formErrors: { ...this.state.formErrors, [fieldName]: errors } };
+    newState[fieldName] = { ...this.state.[fieldName], valid: fieldValid };
+    this.setState(newState, this.validateForm);
+  } 
+
   validateForm() {
-    let formErrors = {};
-    let formValid = true;
-    if (this.state.title.length <= 2) {
-      formErrors.title = ['is too short (minimum is 3 characters)'];
-      formValid = false;
-    }
-    if (this.state.location.length <= 0) {
-      formErrors.location = ["can't be blank"];
-      formValid = false;
-    }
-    if (this.state.start_datetime.length === 0) {
-      formErrors.start_datetime = ["can't be blank"];
-      formValid = false;
-    } else {
-      (Date.parse(this.state.start_datetime) <= Date.now())
-      formErrors.location = [""];
-      formValid = false;
-    }
-    this.setState({ formValid: formValid, formErrors: formErrors });
+    this.setState({ formValid: this.state.title.valid && this.state.start_datetime.valid && this.state.location.valid });
   }
 
   handleSubmit = event => {
     event.preventDefault();
     let newEvent = {
-      title: this.state.title,
-      start_datetime: this.state.start_datetime,
-      location: this.state.location
+      title: this.state.title.value,
+      start_datetime: this.state.start_datetime.value,
+      location: this.state.location.value
     }
     axios({
       method: 'POST',
@@ -92,9 +105,9 @@ class Eventlite extends React.Component {
         <FormErrors formErrors={this.state.formErrors} />
         <EventForm handleInput={this.handleInput} 
           handleSubmit={this.handleSubmit}
-          title={this.state.title}
-          start_datetime={this.state.start_datetime}
-          location={this.state.location}
+          title={this.state.title.value}
+          start_datetime={this.state.start_datetime.value}
+          location={this.state.location.value}
           formValid={this.state.formValid} />
         <EventsList events={this.state.events} />
       </div>
