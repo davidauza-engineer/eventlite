@@ -6,6 +6,8 @@ import EventsList from './EventsList';
 import EventForm from './EventForm';
 import FormErrors from './FormErrors';
 
+import validations from '../validations';
+
 class Eventlite extends React.Component {
 
   constructor(props) {
@@ -20,40 +22,40 @@ class Eventlite extends React.Component {
     };
   }
 
+  static formValidations = {
+    title: [
+      (value) => { return(validations.checkMinLength(value, 3)) }
+    ],
+    start_datetime: [
+      (value) => { return validations.checkMinLength(value, 1) },
+      (value) => { return validations.timeShouldBeInTheFuture(value) }
+    ],
+    location: [
+      (value) => { return(validations.checkMinLength(value, 1)) }
+    ]
+  }
+
   handleInput = (event) => {
     event.preventDefault();
     const name = event.target.name;
     const value = event.target.value
     const newState = {};
     newState[name] = { ...this.state[name], value: value };
-    this.setState(newState, () => this.validateField(name, value));
+    this.setState(newState, () => this.validateField(name, value, Eventlite.formValidations[name]));
   }
 
-  validateField(fieldName, fieldValue) {
+  validateField(fieldName, fieldValue, fieldValidation) {
     let fieldValid = true;
-    let errors = [];
-    switch (fieldName) {
-      case 'title':
-        if (fieldValue.length <= 2) {
-          errors = errors.concat(['is too short (minimum is three characters']);
-          fieldValid = false;
-        }
-        break;
-      case 'location':
-        if (fieldValue.length === 0) {
-          errors = errors.concat(["can't be blank"]);
-          fieldValid = false;
-        }
-        break;
-      case 'start_datetime':
-        if (fieldValue.length === 0) {
-          errors = errors.concat(["can't be blank"]);
-          fieldValid = false;
-        } else if (Date.parse(fieldValue) <= Date.now()) {
-          errors = errors.concat(["can't be in the past"]);
-        }
-        break;
-    }
+    let errors = fieldValidation.reduce((errors, validation) => {
+      let[valid, fieldError] = validation(fieldValue);
+      if (!valid) {
+        errors = errors.concat(fieldError);
+      }
+      return errors;
+    }, []);
+
+    fieldValid = errors.length === 0;
+
     const newState = { formErrors: { ...this.state.formErrors, [fieldName]: errors } };
     newState[fieldName] = { ...this.state.[fieldName], valid: fieldValid };
     this.setState(newState, this.validateForm);
